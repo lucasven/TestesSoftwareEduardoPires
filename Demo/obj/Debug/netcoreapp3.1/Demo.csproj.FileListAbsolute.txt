@@ -1,0 +1,8 @@
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\bin\Debug\netcoreapp3.1\Demo.deps.json
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\bin\Debug\netcoreapp3.1\Demo.dll
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\bin\Debug\netcoreapp3.1\Demo.pdb
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\obj\Debug\netcoreapp3.1\Demo.csprojAssemblyReference.cache
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\obj\Debug\netcoreapp3.1\Demo.AssemblyInfoInputs.cache
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\obj\Debug\netcoreapp3.1\Demo.AssemblyInfo.cs
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\obj\Debug\netcoreapp3.1\Demo.dll
+C:\Users\Sulwork\source\repos\TestesSoftwareEduardoPires\Demo\obj\Debug\netcoreapp3.1\Demo.pdb
