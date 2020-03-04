@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Features.Tests
 {
-    [CollectionDefinition(nameof(ClienteTestsAutoMockerFixture))]
+    [CollectionDefinition(nameof(ClienteAutoMockerCollection))]
     public class ClienteAutoMockerCollection : ICollectionFixture<ClienteTestsAutoMockerFixture>
     {
 

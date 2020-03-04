@@ -1,22 +1,23 @@
 ﻿using Features.Clientes;
 using MediatR;
 using Moq;
-using Moq.AutoMock;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Xunit;
+using FluentAssertions;
+using FluentAssertions.Extensions;
 
 namespace Features.Tests
 {
     [Collection(nameof(ClienteAutoMockerCollection))]
-    public class ClienteServiceAutoMockerFixtureTests
+    public class ClienteServiceFluentAssertionTests
     {
         readonly ClienteTestsAutoMockerFixture _clienteTestsAutoMockerFixture;
 
-        public ClienteServiceAutoMockerFixtureTests(ClienteTestsAutoMockerFixture clienteTestsBogusFixture)
+        public ClienteServiceFluentAssertionTests(ClienteTestsAutoMockerFixture clienteTestsBogusFixture)
         {
             _clienteTestsAutoMockerFixture = clienteTestsBogusFixture;
             _clienteService = _clienteTestsAutoMockerFixture.ObterClienteService();
@@ -25,7 +26,7 @@ namespace Features.Tests
         ClienteService _clienteService;
 
         [Fact(DisplayName = "Adicionar Cliente com Sucesso")]
-        [Trait("Categoria", "Cliente Service AutoMockFixture Tests")]
+        [Trait("Categoria", "Cliente Service Fluent Assertions Tests")]
         public void ClienteService_Adicionar_DeveExecutarComSucesso()
         {
             // Arrange
@@ -40,7 +41,7 @@ namespace Features.Tests
         }
 
         [Fact(DisplayName = "Adicionar Cliente com Falha")]
-        [Trait("Categoria", "Cliente Service AutoMockFixture Tests")]
+        [Trait("Categoria", "Cliente Service Fluent Assertions Tests")]
         public void ClienteService_Adicionar_DeveFalharDevidoClienteInvalido()
         {
             // Arrange
@@ -50,13 +51,16 @@ namespace Features.Tests
             _clienteService.Adicionar(cliente);
 
             // Assert
-            Assert.False(cliente.EhValido());
+            //Assert.False(cliente.EhValido());
             _clienteTestsAutoMockerFixture.Mocker.GetMock<IClienteRepository>().Verify(r => r.Adicionar(cliente), Times.Never);
             _clienteTestsAutoMockerFixture.Mocker.GetMock<IMediator>().Verify(m => m.Publish(It.IsAny<INotification>(), CancellationToken.None), Times.Never);
+
+            // Assert
+            cliente.EhValido().Should().BeFalse("Possui incosistencias");
         }
 
         [Fact(DisplayName = "Obter Clientes Ativos")]
-        [Trait("Categoria", "Cliente Service AutoMockFixture Tests")]
+        [Trait("Categoria", "Cliente Service Fluent Assertions Tests")]
         public void ClienteService_ObterTodosAtivos_DeveRetornarApenasClientesAtivos()
         {
             // Arrange
@@ -68,8 +72,15 @@ namespace Features.Tests
 
             //Assert
             _clienteTestsAutoMockerFixture.Mocker.GetMock<IClienteRepository>().Verify(r => r.ObterTodos(), Times.Once);
-            Assert.True(clientes.Any());
-            Assert.False(clientes.Count(c => !c.Ativo) > 0);
+            clientes.Any().Should().BeTrue();
+            clientes.Should().HaveCountGreaterOrEqualTo(1).And.OnlyHaveUniqueItems();
+            clientes.Should().NotContain(c => !c.Ativo);
+
+            _clienteService.ExecutionTimeOf(c => c.ObterTodosAtivos())
+                .Should()
+                .BeLessOrEqualTo(50.Milliseconds(), "Porque deve ser executado muitas vezes");
+            
+            //Assert.False(clientes.Count(c => !c.Ativo) > 0);
         }
     }
 }
