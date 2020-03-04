@@ -9,7 +9,7 @@ using Bogus.DataSets;
 namespace Features.Tests
 {
     [CollectionDefinition(nameof(ClienteBogusCollection))]
-    public class ClienteBogusCollection : ICollectionFixture<ClienteTestsFixture>
+    public class ClienteBogusCollection : ICollectionFixture<ClienteTestsBogusFixture>
     { }
 
     public class ClienteTestsBogusFixture : IDisposable
