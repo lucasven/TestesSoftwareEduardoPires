@@ -1,20 +1,26 @@
-﻿using Features.Clientes;
+﻿using Bogus;
+using Bogus.DataSets;
+using Features.Clientes;
+using Moq.AutoMock;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
-using Bogus;
-using Bogus.DataSets;
-using System.Linq;
 
 namespace Features.Tests
 {
-    [CollectionDefinition(nameof(ClienteBogusCollection))]
-    public class ClienteBogusCollection : ICollectionFixture<ClienteTestsBogusFixture>
-    { }
-
-    public class ClienteTestsBogusFixture : IDisposable
+    [CollectionDefinition(nameof(ClienteTestsAutoMockerFixture))]
+    public class ClienteAutoMockerCollection : ICollectionFixture<ClienteTestsAutoMockerFixture>
     {
+
+    }
+
+    public class ClienteTestsAutoMockerFixture : IDisposable
+    {
+        public ClienteService ClienteService;
+        public AutoMocker Mocker;
+
         public IEnumerable<Cliente> GerarClientes(int quantidade, bool ativo)
         {
             var genero = new Faker().PickRandom<Name.Gender>();
@@ -52,7 +58,7 @@ namespace Features.Tests
         public Cliente GerarClienteInvalido()
         {
             var genero = new Faker().PickRandom<Name.Gender>();
-            
+
             var cliente = new Faker<Cliente>("pt_BR")
                 .CustomInstantiator(f => new Cliente(
                    Guid.NewGuid(),
@@ -66,10 +72,17 @@ namespace Features.Tests
             return cliente;
         }
 
+        public ClienteService ObterClienteService()
+        {
+            Mocker = new AutoMocker();
+            ClienteService = Mocker.CreateInstance<ClienteService>();
+
+            return ClienteService;
+        }
 
         public void Dispose()
         {
-
+            
         }
     }
 }
