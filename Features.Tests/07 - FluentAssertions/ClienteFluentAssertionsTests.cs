@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using FluentAssertions;
+using Xunit.Abstractions;
 
 namespace Features.Tests
 {
@@ -10,10 +11,13 @@ namespace Features.Tests
     public class ClienteFluentAssertionsTests
     {
         private readonly ClienteTestsBogusFixture _clienteTestsBogusFixture;
+        readonly ITestOutputHelper _outputHelper;
 
-        public ClienteFluentAssertionsTests(ClienteTestsBogusFixture clienteTestsBogusFixture)
+        public ClienteFluentAssertionsTests(ClienteTestsBogusFixture clienteTestsBogusFixture
+            ,ITestOutputHelper testOutputHelper)
         {
             _clienteTestsBogusFixture = clienteTestsBogusFixture;
+            _outputHelper = testOutputHelper;
         }
 
         [Fact(DisplayName = "Novo Cliente Válido")]
@@ -46,9 +50,10 @@ namespace Features.Tests
             var result = cliente.EhValido();
 
             //Assert
+            //Assert.NotEqual(0, cliente.ValidationResult.Errors.Count);
             result.Should().BeFalse();
             cliente.ValidationResult.Errors.Count.Should().BeGreaterThan(1, "deve possuir erros de validação");
-            Assert.NotEqual(0, cliente.ValidationResult.Errors.Count);
+            _outputHelper.WriteLine($"Foram encontrados {cliente.ValidationResult.Errors.Count} erros nessa validacao");
         }
     }
 }
