@@ -17,6 +17,11 @@ namespace NerdStore.Vendas.Domain
         {
             _pedidoItems = new Collection<PedidoItem>();
         }
+
+        public int Codigo { get; private set; }
+
+        public DateTime DataCadastro { get; set; }
+
         public Guid ClienteId { get; private set; }
 
         public decimal ValorTotal { get; private set; }
@@ -29,6 +34,8 @@ namespace NerdStore.Vendas.Domain
 
         public bool VoucherUtilizado { get; set; }
         public Voucher Voucher { get; set; }
+        public Guid? VoucherId { get; private set; }
+
         public decimal Desconto { get; set; }
 
         public ValidationResult AplicarVoucher(Voucher voucher)
@@ -159,6 +166,12 @@ namespace NerdStore.Vendas.Domain
                 pedido.TornarRascunho();
                 return pedido;
             }
+        }
+
+        public void AtualizarUnidades(PedidoItem item, int unidades)
+        {
+            item.AtualizarUnidades(unidades);
+            AtualizarItem(item);
         }
     }
 }

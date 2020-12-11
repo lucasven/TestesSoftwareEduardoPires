@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using NerdStore.Core.Data;
 using NerdStore.Core.DomainObjects;
+using NerdStore.Core.Messages;
+using NerdStore.Vendas.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,37 +21,45 @@ namespace NerdStore.Vendas.Data
             this.mediator = mediator;
         }
 
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<PedidoItem> PedidoItems { get; set; }
+        public DbSet<Voucher> Vouchers { get; set; }
+
         public async Task<bool> Commit()
         {
+            foreach (var entry in ChangeTracker.Entries().Where(entry => entry.Entity.GetType().GetProperty("DataCadastro") != null))
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Property("DataCadastro").CurrentValue = DateTime.Now;
+                }
+
+                if (entry.State == EntityState.Modified)
+                {
+                    entry.Property("DataCadastro").IsModified = false;
+                }
+            }
+
             var sucesso = await base.SaveChangesAsync() > 0;
             if (sucesso) await mediator.PublicarEventos(this);
 
             return sucesso;
         }
-    }
 
-    public static class MediatorExtension
-    {
-        public static async Task PublicarEventos(this IMediator mediator, VendasContext ctx)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var domainEntities = ctx.ChangeTracker
-                .Entries<Entity>()
-                .Where(x => x.Entity.Notificacoes != null && x.Entity.Notificacoes.Any());
+            foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(
+                e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
+                property.SetColumnType("varchar(100)");
 
-            var domainEvents = domainEntities
-                .SelectMany(x => x.Entity.Notificacoes)
-                .ToList();
+            modelBuilder.Ignore<Event>();
 
-            domainEntities.ToList()
-                .ForEach(entity => entity.Entity.LimparEventos());
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(VendasContext).Assembly);
 
-            var tasks = domainEvents
-                .Select(async (domainEvent) =>
-                {
-                    await mediator.Publish(domainEvent);
-                });
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys())) relationship.DeleteBehavior = DeleteBehavior.ClientSetNull;
 
-            await Task.WhenAll(tasks);
+            modelBuilder.HasSequence<int>("MinhaSequencia").StartsAt(1000).IncrementsBy(1);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
