@@ -40,5 +40,10 @@ namespace NerdStore.Vendas.Domain
         {
             Quantidade += unidades;
         }
+
+        internal void AssociarPedido(Guid pedidoId)
+        {
+            PedidoId = pedidoId;
+        }
     }
 }

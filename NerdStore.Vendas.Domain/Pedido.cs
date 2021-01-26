@@ -101,10 +101,11 @@ namespace NerdStore.Vendas.Domain
         {
             ValidarQuantidadeItensPermitida(item);
 
-            if (_pedidoItems.Any(p => p.ProdutoId == item.ProdutoId))
-            {
-                var itemExistente = _pedidoItems.First(c => c.ProdutoId == item.ProdutoId);
+            item.AssociarPedido(Id);
 
+            if (PedidoItemExistente(item))
+            {
+                var itemExistente = _pedidoItems.FirstOrDefault(p => p.ProdutoId == item.ProdutoId);
                 itemExistente.AdicionarUnidades(item.Quantidade);
                 item = itemExistente;
 

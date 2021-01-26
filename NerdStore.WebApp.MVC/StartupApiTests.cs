@@ -16,6 +16,7 @@ using NerdStore.Catalogo.Data;
 using NerdStore.Vendas.Data;
 using NerdStore.WebApp.MVC.Setup;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace NerdStore.WebApp.MVC
 {
@@ -47,10 +48,10 @@ namespace NerdStore.WebApp.MVC
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
 
-            //services.AddIdentityCore<IdentityUser>()
-                //.AddRoles<IdentityRole>()
-                //.AddEntityFrameworkStores<ApplicationDbContext>()
-                //.AddDefaultTokenProviders();
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
             // JWT
 
@@ -60,24 +61,24 @@ namespace NerdStore.WebApp.MVC
             var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
-            //services.AddAuthentication(x =>
-            //{
-            //    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //}).AddJwtBearer(x =>
-            //{
-            //    x.RequireHttpsMetadata = true;
-            //    x.SaveToken = true;
-            //    x.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(key),
-            //        ValidateIssuer = true,
-            //        ValidateAudience = true,
-            //        ValidAudience = appSettings.ValidoEm,
-            //        ValidIssuer = appSettings.Emissor
-            //    };
-            //});
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = true;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = appSettings.ValidoEm,
+                    ValidIssuer = appSettings.Emissor
+                };
+            });
 
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
@@ -87,11 +88,15 @@ namespace NerdStore.WebApp.MVC
             services.AddMediatR(typeof(Startup));
 
             services.RegisterServices();
+
+            services.AddMvc(opt => opt.EnableEndpointRouting = false);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddFile("Logs/carrinho-test-api-{Date}.txt");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -106,16 +111,15 @@ namespace NerdStore.WebApp.MVC
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            //app.UseCookiePolicy();
+            app.UseCookiePolicy();
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
 
-            app.UseRouting();
-            app.UseEndpoints(routes =>
+            app.UseMvc(routes =>
             {
-                routes.MapControllerRoute(
+                routes.MapRoute(
                     name: "default",
-                    pattern: "{controller=Vitrine}/{action=Index}/{id?}");
+                    template: "{controller=Vitrine}/{action=Index}/{id?}");
             });
         }
 

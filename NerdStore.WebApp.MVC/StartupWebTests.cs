@@ -15,6 +15,7 @@ using NerdStore.Catalogo.Data;
 using NerdStore.Vendas.Data;
 using NerdStore.WebApp.MVC.Setup;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace NerdStore.WebApp.MVC
 {
@@ -67,8 +68,10 @@ namespace NerdStore.WebApp.MVC
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddFile("Logs/carrinho-test-web-{Date}.txt");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -88,6 +91,9 @@ namespace NerdStore.WebApp.MVC
             app.UseAuthentication();
 
             app.UseRouting();
+
+            app.UseAuthorization();
+
             app.UseEndpoints(routes =>
             {
                 routes.MapControllerRoute(
